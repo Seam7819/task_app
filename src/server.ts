@@ -3,6 +3,8 @@ import config from "./config"
 import initDB, { pool } from "./config/db"
 import logger from "./middleware/logger"
 import { userRoutes } from "./modules/user/user.route"
+import { todoRouter } from "./modules/todo/todo.routes"
+import { authRoutes } from "./modules/auth/auth.routes"
 
 const app = express()
 const port = config.port
@@ -23,80 +25,9 @@ app.get('/', logger,(req:Request, res:Response) => {
 // users crud
 app.use('/users', userRoutes)
 
-app.use('/users', userRoutes)
-
-app.use('/users', userRoutes)
-
-app.use('/users', userRoutes)
-
-app.use('/users', userRoutes )
-
 // todos crud
 
-app.post('/todos', async (req: Request,res:Response)=>{
-
-    const {user_id,title} = req.body;
-    
-
-    try{
-        const result = await pool.query(`INSERT INTO todos(user_id,title) VALUES($1,$2) 
-            RETURNING *`,[user_id,title])
-
-            console.log(result);
-        res.status(201).json({
-            success: true,
-            message: "Todos Created",
-            data : result.rows[0]
-        })
-    }catch(err : any){
-        res.status(500).json({
-            success : false,
-            message : err.message
-        })
-    }
-}
-)
-
-app.get('/todos', async(req:Request,res:Response)=>{
-    try{
-        const result = await pool.query(`SELECT * FROM todos`)
-
-        res.status(200).json({
-            success: true,
-            message: "All data get",
-            data : result.rows
-        })
-    }catch(err : any){
-        res.status(500).json({
-            success: false,
-            message : err.message
-        })
-    }
-})
-
-app.get('/todos/:id', async (req:Request,res:Response)=>{
-    try{
-        const result = await pool.query(`SELECT * FROM todos WHERE id = $1`, [req.params.id])
-
-        if(result.rows.length === 0 ){
-            res.status(404).json({
-                success: false,
-                message : "Not found"
-            })
-        }else{
-            res.status(200).json({
-                success: true,
-                message : "data found",
-                data : result.rows[0]
-            })
-        }
-    }catch (err : any) {
-        res.status(500).json({
-            success: false,
-            message : "data not found"
-        })
-    }
-})
+app.use('/todos', todoRouter);
 
 app.put('/todos/:id', async(req:Request, res: Response)=>{
     const {user_id,title} = req.body;
@@ -124,6 +55,13 @@ app.put('/todos/:id', async(req:Request, res: Response)=>{
     }
 })
 
+app.delete("/todo/:id", (req: Request, res : Response)=>{
+
+})
+
+// auth crud
+
+app.use('/auth', authRoutes);
 
 app.use((req:Request,res:Response)=>{
     res.status(404).json({
